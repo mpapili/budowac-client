@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Budowac</title>
+    <style>
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0614; color: #eee;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+      #hud {
+        position: fixed; top: 0; left: 0; right: 0; padding: .75rem 1rem;
+        pointer-events: none; z-index: 2;
+        text-shadow: 0 1px 2px #000;
+      }
+      #hud h1 { margin: 0; font-size: 1.1rem; font-weight: 600; letter-spacing: .04em; }
+      #hud p { margin: .25rem 0 0; font-size: .8rem; color: #b8a0d0; }
+      canvas { display: block; }
+    </style>
+  </head>
+  <body>
+    <div id="hud">
+      <h1>Budowac</h1>
+      <p id="status">boot…</p>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
