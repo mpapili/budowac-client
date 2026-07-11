@@ -11,4 +11,7 @@ export enum MessageTag {
   Edit = 8,
   Occurrence = 9,
   StateSummary = 10,
+  /** gateway ↔ server only (not client WS). */
+  Join = 11,
+  Leave = 12,
 }

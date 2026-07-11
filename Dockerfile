@@ -4,8 +4,10 @@ WORKDIR /app
 COPY package.json ./
 RUN npm install
 COPY . .
-ARG VITE_API_URL=http://localhost:8080
-ARG VITE_GATEWAY_URL=ws://localhost:8081
+# Optional bake-in overrides. Leave empty so the browser uses the page
+# hostname at runtime (same host the client was opened on, ports 8080/8081).
+ARG VITE_API_URL=
+ARG VITE_GATEWAY_URL=
 ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_GATEWAY_URL=$VITE_GATEWAY_URL
 RUN npm run build

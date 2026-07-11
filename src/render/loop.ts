@@ -2,7 +2,7 @@ import type { SceneBundle } from './scene';
 
 export type UpdateFn = (dt: number) => void;
 
-/** requestAnimationFrame game loop. Expandable for prediction / interp. */
+/** requestAnimationFrame game loop. Expandable for fixed-tick prediction / interp. */
 export function startLoop(bundle: SceneBundle, update: UpdateFn): () => void {
   let last = performance.now();
   let raf = 0;
