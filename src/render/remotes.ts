@@ -2,12 +2,13 @@ import * as THREE from 'three';
 import type { EntityState } from '../proto/types';
 
 /**
- * Simple remote-player avatars: colored capsule + head, lerp to snapshot pose.
+ * Remote entities: player capsules + simple goats, lerp to snapshot pose.
  */
 export class RemotePlayers {
   readonly root = new THREE.Group();
   private meshes = new Map<string, THREE.Group>();
   private targets = new Map<string, { x: number; y: number; z: number; yaw: number }>();
+  private kinds = new Map<string, string>();
 
   constructor(scene: THREE.Scene) {
     this.root.name = 'remotePlayers';
@@ -21,9 +22,17 @@ export class RemotePlayers {
       if (!e.entityId || e.entityId === localPlayerId) continue;
       seen.add(e.entityId);
       this.targets.set(e.entityId, { x: e.x, y: e.y, z: e.z, yaw: e.yaw });
-      if (!this.meshes.has(e.entityId)) {
-        const mesh = makeAvatar(e.entityId);
+      const kind = e.kind ?? '';
+      const prev = this.kinds.get(e.entityId);
+      if (!this.meshes.has(e.entityId) || prev !== kind) {
+        const old = this.meshes.get(e.entityId);
+        if (old) {
+          this.root.remove(old);
+          disposeGroup(old);
+        }
+        const mesh = kind === 'goat' ? makeGoat() : makeAvatar(e.entityId);
         this.meshes.set(e.entityId, mesh);
+        this.kinds.set(e.entityId, kind);
         this.root.add(mesh);
       }
     }
@@ -34,6 +43,7 @@ export class RemotePlayers {
         disposeGroup(m);
         this.meshes.delete(id);
         this.targets.delete(id);
+        this.kinds.delete(id);
       }
     }
   }
@@ -46,7 +56,6 @@ export class RemotePlayers {
       mesh.position.x += (t.x - mesh.position.x) * 0.35;
       mesh.position.y += (t.y - mesh.position.y) * 0.35;
       mesh.position.z += (t.z - mesh.position.z) * 0.35;
-      // yaw is horizontal look
       const cur = mesh.rotation.y;
       let dy = t.yaw - cur;
       while (dy > Math.PI) dy -= Math.PI * 2;
@@ -68,12 +77,42 @@ function makeAvatar(id: string): THREE.Group {
   const color = new THREE.Color().setHSL(hashHue(id), 0.55, 0.5);
   const bodyMat = new THREE.MeshLambertMaterial({ color });
   const headMat = new THREE.MeshLambertMaterial({ color: color.clone().offsetHSL(0, 0, 0.15) });
-  // body cylinder ~1.4 tall, radius 0.3, feet at y=0
   const body = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1.4, 10), bodyMat);
   body.position.y = 0.7;
   const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 8), headMat);
   head.position.y = 1.55;
   g.add(body, head);
+  return g;
+}
+
+/** Small procedural goat: body, head, four legs, stub horns. */
+function makeGoat(): THREE.Group {
+  const g = new THREE.Group();
+  g.name = 'remote:goat';
+  const fur = new THREE.MeshLambertMaterial({ color: 0x8b7355 });
+  const dark = new THREE.MeshLambertMaterial({ color: 0x5c4a3a });
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.32, 0.75), fur);
+  body.position.y = 0.42;
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.18, 0.28), fur);
+  head.position.set(0, 0.52, 0.48);
+  const legGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.28, 6);
+  const legs: THREE.Mesh[] = [];
+  for (const [lx, lz] of [
+    [-0.16, 0.22],
+    [0.16, 0.22],
+    [-0.16, -0.22],
+    [0.16, -0.22],
+  ] as const) {
+    const leg = new THREE.Mesh(legGeo, dark);
+    leg.position.set(lx, 0.14, lz);
+    legs.push(leg);
+  }
+  const hornGeo = new THREE.ConeGeometry(0.035, 0.1, 5);
+  const hL = new THREE.Mesh(hornGeo, dark);
+  hL.position.set(-0.06, 0.64, 0.42);
+  const hR = new THREE.Mesh(hornGeo, dark);
+  hR.position.set(0.06, 0.64, 0.42);
+  g.add(body, head, ...legs, hL, hR);
   return g;
 }
 

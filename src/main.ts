@@ -213,17 +213,24 @@ async function boot(): Promise<void> {
           : `holding ${brickDef(PLACEABLE_BRICKS[lastHotbar]).name}`,
       );
     }
-    const peers = Math.max(0, world.entities.size - (localPlayerId ? 1 : 0));
+    let peers = 0;
+    let goats = 0;
+    for (const e of world.entities.values()) {
+      if (e.entityId === localPlayerId) continue;
+      if (e.kind === 'goat') goats++;
+      else peers++;
+    }
     setCoords(
       `xyz ${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}, ${player.position.z.toFixed(1)}` +
         (hit ? ` · look ${brickDef(world.getBlock(hit.x, hit.y, hit.z)).name}` : '') +
-        (peers > 0 ? ` · peers ${peers}` : ''),
+        (peers > 0 ? ` · peers ${peers}` : '') +
+        (goats > 0 ? ` · goats ${goats}` : ''),
     );
     setCrosshairVisible(controls.pointerLocked);
     if (!controls.pointerLocked) {
       setHint('Click the game to play · Esc releases mouse');
     } else {
-      setHint('WASD · Space · Shift sprint · LMB break · RMB place · others are capsules');
+      setHint('WASD · Space · Shift sprint · LMB break · RMB place · goats wander nearby');
     }
   });
 }

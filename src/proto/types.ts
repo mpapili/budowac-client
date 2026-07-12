@@ -29,6 +29,8 @@ export interface EntityState {
   yaw: number;
   pitch: number;
   brickType?: number;
+  /** ""/undefined = player; "goat" = NPC */
+  kind?: string;
 }
 
 export interface Snapshot {
