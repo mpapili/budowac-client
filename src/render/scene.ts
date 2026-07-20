@@ -3,6 +3,7 @@ import type { Chunk } from '../world/chunk';
 import type { ClientWorld } from '../world/state';
 import { BrickMaterials } from './materials';
 import { meshChunk } from './mesher';
+import { createClouds } from './clouds';
 
 export interface SceneBundle {
   renderer: THREE.WebGLRenderer;
@@ -23,6 +24,8 @@ export function createScene(container: HTMLElement = document.body): SceneBundle
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x87b5e0);
   scene.fog = new THREE.FogExp2(0xc8daf0, 0.012);
+
+  createClouds(scene);
 
   const camera = new THREE.PerspectiveCamera(
     75,
