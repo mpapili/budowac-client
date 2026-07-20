@@ -1,6 +1,11 @@
 import * as THREE from 'three';
 import type { EntityState } from '../proto/types';
 
+/** Horizontal (X/Z/yaw) lerp speed — snappy tracking. */
+export const LERP_HORIZONTAL = 0.35;
+/** Vertical (Y) lerp speed — slower so elevation changes look smooth. */
+export const LERP_VERTICAL = 0.12;
+
 /**
  * Remote entities: player capsules + simple goats, lerp to snapshot pose.
  */
@@ -53,14 +58,14 @@ export class RemotePlayers {
     for (const [id, mesh] of this.meshes) {
       const t = this.targets.get(id);
       if (!t) continue;
-      mesh.position.x += (t.x - mesh.position.x) * 0.35;
-      mesh.position.y += (t.y - mesh.position.y) * 0.35;
-      mesh.position.z += (t.z - mesh.position.z) * 0.35;
+      mesh.position.x += (t.x - mesh.position.x) * LERP_HORIZONTAL;
+      mesh.position.y += (t.y - mesh.position.y) * LERP_VERTICAL;
+      mesh.position.z += (t.z - mesh.position.z) * LERP_HORIZONTAL;
       const cur = mesh.rotation.y;
       let dy = t.yaw - cur;
       while (dy > Math.PI) dy -= Math.PI * 2;
       while (dy < -Math.PI) dy += Math.PI * 2;
-      mesh.rotation.y = cur + dy * 0.35;
+      mesh.rotation.y = cur + dy * LERP_HORIZONTAL;
     }
   }
 }
